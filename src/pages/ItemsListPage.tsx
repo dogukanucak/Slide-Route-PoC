@@ -1,10 +1,25 @@
-import { useFetchAndNavigate } from '../features/items/hooks/useFetchAndNavigate';
-import { useAppSelector } from '../app/hooks';
+import { useCallback } from 'react';
+import { useFetchAndNavigate } from '../hooks/useFetchAndNavigate';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { fetchItemDetailThunk } from '../features/items/itemsSlice';
 import { ITEMS } from '../api/mockApi';
 
 export default function ItemsListPage() {
-  const { handleItemClick, loadingItemId } = useFetchAndNavigate();
+  const dispatch = useAppDispatch();
+  const fetchAndNavigate = useFetchAndNavigate();
+  const loadingItemId = useAppSelector((state) => state.items.loadingItemId);
   const error = useAppSelector((state) => state.items.error);
+
+  const handleItemClick = useCallback(
+    (id: string) => {
+      if (loadingItemId) return;
+      fetchAndNavigate(
+        () => dispatch(fetchItemDetailThunk(id)).unwrap(),
+        '/details',
+      );
+    },
+    [dispatch, fetchAndNavigate, loadingItemId],
+  );
 
   return (
     <div className="page items-list-page">
